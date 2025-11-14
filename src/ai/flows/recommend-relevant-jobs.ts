@@ -1,65 +1,67 @@
 'use server';
 
 /**
- * @fileOverview This file defines a Genkit flow for recommending relevant job offers to job seekers based on their profile.
+ * @fileOverview This file defines a Genkit flow for recommending relevant job seekers for a given job offer.
  *
- * - recommendRelevantJobs - A function that takes a job seeker's profile and returns a list of recommended job offers.
- * - JobSeekerProfile - The input type for the recommendRelevantJobs function, representing the job seeker's profile.
- * - RecommendedJobOffers - The output type for the recommendRelevantJobs function, representing a list of recommended job offers.
+ * - recommendCandidates - A function that takes job offer details and returns a list of recommended candidates.
+ * - JobOfferDetails - The input type for the recommendCandidates function, representing the job offer.
+ * - RecommendedCandidates - The output type for the recommendCandidates function, representing a list of recommended job seekers.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-const JobSeekerProfileSchema = z.object({
-  skills: z.array(z.string()).describe('List of skills possessed by the job seeker.'),
-  experience: z.string().describe('Description of the job seeker\'s previous experience.'),
-  desiredJobType: z.string().describe('The type of job the job seeker is looking for (e.g., housekeeper, nanny).'),
-  locationPreferences: z.string().describe('Preferred locations for the job (e.g., city, region in Côte d\'Ivoire).'),
-  salaryExpectations: z.number().describe('The job seeker\'s expected salary in FCFA.'),
+const JobOfferDetailsSchema = z.object({
+  jobTitle: z.string().describe('The title of the job offer.'),
+  skillsRequired: z.array(z.string()).describe('List of skills required for the job.'),
+  experienceRequired: z.string().describe('Description of the experience required for the job.'),
+  jobType: z.string().describe('The type of job being offered (e.g., housekeeper, nanny).'),
+  location: z.string().describe('The location of the job in Côte d\'Ivoire.'),
+  salaryOffered: z.number().describe('The salary offered for the job in FCFA.'),
 });
 
-export type JobSeekerProfile = z.infer<typeof JobSeekerProfileSchema>;
+export type JobOfferDetails = z.infer<typeof JobOfferDetailsSchema>;
 
-const RecommendedJobOffersSchema = z.array(z.object({
-  jobTitle: z.string().describe('The title of the job offer.'),
-  company: z.string().describe('The name of the company offering the job.'),
-  location: z.string().describe('The location of the job in Côte d\'Ivoire.'),
-  description: z.string().describe('A brief description of the job offer.'),
-  skillsRequired: z.array(z.string()).describe('A list of skills required for the job.'),
-  salary: z.number().describe('The salary offered for the job in FCFA.'),
+const RecommendedCandidatesSchema = z.array(z.object({
+  name: z.string().describe("The candidate's fictional name."),
+  skills: z.array(z.string()).describe("The candidate's skills."),
+  experience: z.string().describe("A brief summary of the candidate's experience."),
+  location: z.string().describe("The candidate's preferred work location."),
+  expectedSalary: z.number().describe("The candidate's expected salary in FCFA."),
+  availability: z.string().describe("The candidate's availability (e.g., 'Immediate', 'In 2 weeks')."),
 }));
 
-export type RecommendedJobOffers = z.infer<typeof RecommendedJobOffersSchema>;
+export type RecommendedCandidates = z.infer<typeof RecommendedCandidatesSchema>;
 
-export async function recommendRelevantJobs(profile: JobSeekerProfile): Promise<RecommendedJobOffers> {
-  return recommendRelevantJobsFlow(profile);
+export async function recommendCandidates(details: JobOfferDetails): Promise<RecommendedCandidates> {
+  return recommendCandidatesFlow(details);
 }
 
 const prompt = ai.definePrompt({
-  name: 'recommendRelevantJobsPrompt',
-  input: {schema: JobSeekerProfileSchema},
-  output: {schema: RecommendedJobOffersSchema},
-  prompt: `You are an AI job recommendation system for jobs in Côte d'Ivoire. The currency is FCFA. Given the following job seeker profile, recommend a list of relevant job offers.
+  name: 'recommendCandidatesPrompt',
+  input: {schema: JobOfferDetailsSchema},
+  output: {schema: RecommendedCandidatesSchema},
+  prompt: `You are an AI recruitment assistant for domestic help jobs in Côte d'Ivoire. The currency is FCFA. Given the following job offer, generate a list of 3 fictional but realistic candidate profiles that would be a good match.
 
-Job Seeker Profile:
-Skills: {{#each skills}}{{{this}}}, {{/each}}
-Experience: {{{experience}}}
-Desired Job Type: {{{desiredJobType}}}
-Location Preferences: {{{locationPreferences}}}
-Salary Expectations: {{{salaryExpectations}}} FCFA
+Job Offer Details:
+Job Title: {{{jobTitle}}}
+Skills Required: {{#each skillsRequired}}{{{this}}}, {{/each}}
+Experience Required: {{{experienceRequired}}}
+Job Type: {{{jobType}}}
+Location: {{{location}}}
+Salary Offered: {{{salaryOffered}}} FCFA
 
-Based on this profile, recommend job offers that match the job seeker's skills, experience, desired job type, location preferences and salary expectations. The output must be a JSON array.
+Based on this offer, recommend candidates that match the required skills, experience, job type, and location. Their salary expectations should be realistic and around the offered salary. The output must be a JSON array of candidate profiles.
 
-Ensure that each job offer includes the job title, company, location, description, skills required and salary in FCFA.
+Ensure each candidate profile includes their name, skills, a summary of their experience, preferred location, expected salary in FCFA, and availability.
 `,  
 });
 
-const recommendRelevantJobsFlow = ai.defineFlow(
+const recommendCandidatesFlow = ai.defineFlow(
   {
-    name: 'recommendRelevantJobsFlow',
-    inputSchema: JobSeekerProfileSchema,
-    outputSchema: RecommendedJobOffersSchema,
+    name: 'recommendCandidatesFlow',
+    inputSchema: JobOfferDetailsSchema,
+    outputSchema: RecommendedCandidatesSchema,
   },
   async input => {
     const {output} = await prompt(input);
