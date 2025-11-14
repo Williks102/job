@@ -23,6 +23,7 @@ import type { RecommendedCandidates } from "@/ai/flows/recommend-relevant-jobs";
 import { Wand2, User, Briefcase, MapPin, Wallet, Calendar } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
 import { Badge } from "./ui/badge";
+import { fallbackCandidates } from "@/lib/candidates";
 
 const formSchema = z.object({
   jobTitle: z.string().min(5, { message: "Veuillez entrer un titre de poste." }),
@@ -62,10 +63,11 @@ export default function CandidateRecommender() {
 
     const result = await getRecommendedCandidates(offerDetails);
 
-    if (result.success) {
+    if (result.success && result.data && result.data.length > 0) {
       setRecommendations(result.data);
     } else {
-      setError(result.error);
+      setError(result.error || "La recommandation par IA a échoué. Affichage des profils de secours.");
+      setRecommendations(fallbackCandidates);
     }
     setIsLoading(false);
   }
