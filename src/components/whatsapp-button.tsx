@@ -15,7 +15,7 @@ const WhatsAppIconComponent = () => (
 
 export default function WhatsAppButton({ jobTitle, jobLocation }: WhatsAppButtonProps) {
   const handleWhatsAppClick = () => {
-    const message = encodeURIComponent(`Ce profil m'intéresse en tant que ${jobTitle}.`);
+    const message = encodeURIComponent(`Je suis intéressé par ce profil ${jobTitle}. Quelles sont les conditions pour son recrutement ?`);
     const phoneNumber = "2250702490277";
     window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
   };
