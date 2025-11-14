@@ -12,6 +12,17 @@ interface JobCardProps {
   job: Job;
 }
 
+const formatSalary = (salary: number, type: Job['salaryType']) => {
+    const formattedSalary = new Intl.NumberFormat('fr-CI').format(salary);
+    switch (type) {
+        case 'hour': return `${formattedSalary} FCFA / heure`;
+        case 'day': return `${formattedSalary} FCFA / jour`;
+        case 'month': return `${formattedSalary} FCFA / mois`;
+        case 'year': return `${formattedSalary} FCFA / an`;
+        default: return `${formattedSalary} FCFA`;
+    }
+}
+
 export default function JobCard({ job }: JobCardProps) {
   const placeholder = PlaceHolderImages.find((p) => p.id === job.image);
 
@@ -45,7 +56,7 @@ export default function JobCard({ job }: JobCardProps) {
           </div>
           <div className="flex items-center gap-2">
             <Wallet className="h-4 w-4" />
-            <span>{job.salary} € / {job.salaryType === 'hour' ? 'heure' : 'mois'}</span>
+            <span>{formatSalary(job.salary, job.salaryType)}</span>
           </div>
         </div>
       </CardContent>

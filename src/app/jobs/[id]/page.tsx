@@ -8,10 +8,22 @@ import { ArrowLeft, CheckCircle, MapPin, Wallet } from 'lucide-react';
 import WhatsAppButton from '@/components/whatsapp-button';
 import { Button } from '@/components/ui/button';
 import { JobIcon } from '@/components/icons';
+import type { Job } from '@/lib/types';
 
 type Props = {
   params: { id: string };
 };
+
+const formatSalary = (salary: number, type: Job['salaryType']) => {
+    const formattedSalary = new Intl.NumberFormat('fr-CI').format(salary);
+    switch (type) {
+        case 'hour': return `${formattedSalary} FCFA / heure`;
+        case 'day': return `${formattedSalary} FCFA / jour`;
+        case 'month': return `${formattedSalary} FCFA / mois`;
+        case 'year': return `${formattedSalary} FCFA / an`;
+        default: return `${formattedSalary} FCFA`;
+    }
+}
 
 export async function generateStaticParams() {
   return jobs.map((job) => ({
@@ -64,7 +76,7 @@ export default function JobDetailPage({ params }: Props) {
                 </div>
                 <div className="flex items-center gap-2">
                     <Wallet className="h-5 w-5" />
-                    <span>{job.salary} € / {job.salaryType === 'hour' ? 'heure' : 'mois'}</span>
+                    <span>{formatSalary(job.salary, job.salaryType)}</span>
                 </div>
             </div>
 

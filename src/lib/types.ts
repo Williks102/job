@@ -6,7 +6,7 @@ export type Job = {
   category: JobCategory;
   location: string;
   salary: number;
-  salaryType: 'hour' | 'month' | 'year';
+  salaryType: 'hour' | 'month' | 'year' | 'day';
   description: string;
   requirements: string[];
   image: string; // id from placeholder-images.json

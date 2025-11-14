@@ -67,6 +67,10 @@ export default function JobRecommender() {
     }
     setIsLoading(false);
   }
+  
+  const formatSalary = (salary: number) => {
+    return new Intl.NumberFormat('fr-CI').format(salary) + ' FCFA';
+  }
 
   return (
     <section>
@@ -131,7 +135,7 @@ export default function JobRecommender() {
                     <FormItem>
                       <FormLabel>Lieux préférés</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ex: Paris, Lyon" {...field} />
+                        <Input placeholder="Ex: Abidjan, Bouaké" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -142,9 +146,9 @@ export default function JobRecommender() {
                   name="salaryExpectations"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Salaire mensuel net attendu (€)</FormLabel>
+                      <FormLabel>Salaire mensuel net attendu (FCFA)</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="Ex: 2000" {...field} />
+                        <Input type="number" placeholder="Ex: 100000" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -191,7 +195,7 @@ export default function JobRecommender() {
                         </div>
                     </CardContent>
                     <CardFooter className="flex justify-between items-center">
-                        <p className="font-bold text-lg">{rec.salary}€</p>
+                        <p className="font-bold text-lg">{formatSalary(rec.salary)}</p>
                         <p className="text-muted-foreground">{rec.location}</p>
                     </CardFooter>
                   </Card>
