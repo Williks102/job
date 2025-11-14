@@ -1,5 +1,6 @@
 import { Home } from 'lucide-react';
 import Link from 'next/link';
+import { Button } from './ui/button';
 
 export default function Header() {
   return (
@@ -14,6 +15,17 @@ export default function Header() {
               Domicile Emploi
             </span>
           </Link>
+          <nav className="hidden md:flex items-center gap-4">
+            <Button variant="ghost" asChild>
+                <Link href="/">Nos offres</Link>
+            </Button>
+             <Button variant="ghost" asChild>
+                <Link href="/contact">Contact</Link>
+            </Button>
+            <Button asChild>
+                <Link href="/login">Se connecter</Link>
+            </Button>
+          </nav>
         </div>
       </div>
     </header>

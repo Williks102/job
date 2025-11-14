@@ -3,6 +3,7 @@ import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseErrorListener } from '@/components/firebase-error-listener';
+import Header from '@/components/header';
 
 export const metadata: Metadata = {
   title: 'Domicile Emploi',
@@ -22,6 +23,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Literata:opsz,wght@7..72,400;700&display=swap" rel="stylesheet" />
       </head>
       <body className={cn('font-body antialiased min-h-screen flex flex-col bg-background')}>
+        <Header />
         <main className="flex-grow">{children}</main>
         <Toaster />
         <FirebaseErrorListener />
