@@ -18,7 +18,8 @@ function getClientApp(): FirebaseApp {
 export async function signInWithEmail(email: string, password: string): Promise<void> {
   const app = getClientApp();
   const auth = getAuth(app);
-  const userCredential = await userCredential.user.getIdToken();
+  const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  const idToken = await userCredential.user.getIdToken();
   
   // Create session cookie
   const adminApp = await initAdmin();
