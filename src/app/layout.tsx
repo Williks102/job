@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
+import { FirebaseErrorListener } from '@/components/firebase-error-listener';
 
 export const metadata: Metadata = {
   title: 'Domicile Emploi',
@@ -23,6 +24,7 @@ export default function RootLayout({
       <body className={cn('font-body antialiased min-h-screen flex flex-col bg-background')}>
         <main className="flex-grow">{children}</main>
         <Toaster />
+        <FirebaseErrorListener />
       </body>
     </html>
   );

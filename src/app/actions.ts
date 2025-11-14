@@ -2,9 +2,10 @@
 
 import { recommendCandidates, type JobOfferDetails } from "@/ai/flows/recommend-relevant-jobs";
 import { z } from "zod";
-import { collection, addDoc, getDocs, Timestamp } from "firebase/firestore";
+import { collection, addDoc, getDocs, Timestamp }from "firebase/firestore";
 import { db } from "@/lib/firebase/firebase";
 import type { Job } from "@/lib/types";
+import { isFirebaseError, FirestorePermissionError, errorEmitter } from "@/lib/firebase/error-handler";
 
 const JobOfferDetailsSchema = z.object({
     jobTitle: z.string().describe('The title of the job offer.'),
@@ -53,11 +54,21 @@ export async function addJob(formData: unknown) {
             image: `housekeeper-${Math.floor(Math.random() * 2) + 1}`,
         };
 
-        await addDoc(collection(db, "jobs"), newJob);
+        const jobsCollection = collection(db, "jobs");
+        await addDoc(jobsCollection, newJob);
         
         return { success: true, message: "Offre d'emploi créée avec succès." };
 
     } catch (error) {
+        if (isFirebaseError(error) && error.code === 'permission-denied') {
+            const permissionError = new FirestorePermissionError(
+                'write',
+                collection(db, "jobs"),
+                {...error}
+            );
+            errorEmitter.emit('permission-error', permissionError);
+            return { success: false, error: permissionError.publicMessage };
+        }
         console.error("Error adding job:", error);
         if (error instanceof z.ZodError) {
             return { success: false, error: "Données du formulaire invalides." };
@@ -68,7 +79,8 @@ export async function addJob(formData: unknown) {
 
 export async function getJobs() {
     try {
-        const querySnapshot = await getDocs(collection(db, "jobs"));
+        const jobsCollection = collection(db, "jobs");
+        const querySnapshot = await getDocs(jobsCollection);
         const jobs: Job[] = [];
         querySnapshot.forEach((doc) => {
             const data = doc.data();
@@ -76,6 +88,15 @@ export async function getJobs() {
         });
         return { success: true, data: jobs };
     } catch (error) {
+        if (isFirebaseError(error) && error.code === 'permission-denied') {
+            const permissionError = new FirestorePermissionError(
+                'read',
+                collection(db, "jobs"),
+                {...error}
+            );
+            errorEmitter.emit('permission-error', permissionError);
+            return { success: false, error: permissionError.publicMessage };
+        }
         console.error("Error fetching jobs:", error);
         return { success: false, error: "Impossible de charger les offres d'emploi." };
     }
