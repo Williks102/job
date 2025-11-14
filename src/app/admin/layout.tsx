@@ -1,6 +1,6 @@
 import { Sidebar, SidebarProvider } from '@/components/ui/sidebar';
 import AdminSidebar from '@/components/admin-sidebar';
-import { getCurrentUser } from '@/lib/firebase/auth';
+import { checkAdminPrivileges } from '@/lib/firebase/auth';
 import { redirect } from 'next/navigation';
 
 export default async function AdminLayout({
@@ -8,8 +8,8 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getCurrentUser();
-  if (!user) {
+  const isAdmin = await checkAdminPrivileges();
+  if (!isAdmin) {
     redirect('/login');
   }
   
