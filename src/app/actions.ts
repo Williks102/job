@@ -6,6 +6,7 @@ import { collection, addDoc, getDocs, Timestamp }from "firebase/firestore";
 import { db } from "@/lib/firebase/firebase";
 import type { Job } from "@/lib/types";
 import { isFirebaseError, FirestorePermissionError, errorEmitter } from "@/lib/firebase/error-handler";
+import { signInWithEmail, signOut } from "@/lib/firebase/auth";
 
 const JobOfferDetailsSchema = z.object({
     jobTitle: z.string().describe('The title of the job offer.'),
@@ -26,6 +27,10 @@ const jobFormSchema = z.object({
   requirements: z.string().min(5, 'Les conditions sont requises.'),
 });
 
+const loginFormSchema = z.object({
+  email: z.string().email("L'adresse e-mail n'est pas valide."),
+  password: z.string().min(6, 'Le mot de passe doit comporter au moins 6 caractères.'),
+});
 
 export async function getRecommendedCandidates(details: JobOfferDetails) {
   try {
@@ -100,4 +105,31 @@ export async function getJobs() {
         console.error("Error fetching jobs:", error);
         return { success: false, error: "Impossible de charger les offres d'emploi." };
     }
+}
+
+export async function handleLogin(formData: unknown) {
+  try {
+    const validatedData = loginFormSchema.parse(formData);
+    const { email, password } = validatedData;
+    await signInWithEmail(email, password);
+    return { success: true };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { success: false, error: "Données de connexion invalides." };
+    }
+    // Firebase Auth errors have a 'code' property
+    if (isFirebaseError(error)) {
+        switch (error.code) {
+            case 'auth/invalid-credential':
+                return { success: false, error: 'Email ou mot de passe incorrect.' };
+            default:
+                 return { success: false, error: 'Une erreur est survenue lors de la connexion.' };
+        }
+    }
+    return { success: false, error: 'Une erreur inconnue est survenue.' };
+  }
+}
+
+export async function handleLogout() {
+    await signOut();
 }

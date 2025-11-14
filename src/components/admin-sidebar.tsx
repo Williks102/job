@@ -9,9 +9,10 @@ import {
   SidebarFooter,
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Home, LayoutGrid, Briefcase, Settings, LogOut } from 'lucide-react';
-import { Button } from './ui/button';
+import { handleLogout } from '@/app/actions';
+import { useToast } from '@/hooks/use-toast';
 
 const links = [
   { href: '/admin', label: 'Tableau de bord', icon: LayoutGrid },
@@ -20,6 +21,18 @@ const links = [
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const onLogout = async () => {
+    await handleLogout();
+    toast({
+        title: 'Déconnexion',
+        description: 'Vous avez été déconnecté avec succès.',
+    });
+    router.push('/login');
+    router.refresh();
+  };
 
   return (
     <>
@@ -62,11 +75,9 @@ export default function AdminSidebar() {
                 </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Déconnexion" variant="outline">
-                    <Link href="/">
-                        <LogOut/>
-                        <span>Déconnexion</span>
-                    </Link>
+                <SidebarMenuButton onClick={onLogout} tooltip="Déconnexion" variant="outline">
+                    <LogOut/>
+                    <span>Déconnexion</span>
                 </SidebarMenuButton>
             </SidebarMenuItem>
         </SidebarMenu>
