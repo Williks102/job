@@ -1,4 +1,3 @@
-import { jobs } from '@/lib/jobs';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -9,6 +8,8 @@ import WhatsAppButton from '@/components/whatsapp-button';
 import { Button } from '@/components/ui/button';
 import { JobIcon } from '@/components/icons';
 import type { Job } from '@/lib/types';
+import { doc, getDoc, collection, getDocs } from "firebase/firestore";
+import { db } from '@/lib/firebase/firebase';
 
 type Props = {
   params: { id: string };
@@ -25,14 +26,38 @@ const formatSalary = (salary: number, type: Job['salaryType']) => {
     }
 }
 
-export async function generateStaticParams() {
-  return jobs.map((job) => ({
-    id: job.id,
-  }));
+async function getJob(id: string): Promise<Job | null> {
+    try {
+        const docRef = doc(db, "jobs", id);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            return { id: docSnap.id, ...docSnap.data() } as Job;
+        } else {
+            console.log("No such document!");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error getting document:", error);
+        return null;
+    }
 }
 
-export default function JobDetailPage({ params }: Props) {
-  const job = jobs.find((j) => j.id === params.id);
+export async function generateStaticParams() {
+  try {
+    const querySnapshot = await getDocs(collection(db, "jobs"));
+    const paths = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+    }));
+    return paths;
+  } catch (error) {
+    console.error("Error fetching job IDs for static generation:", error);
+    return [];
+  }
+}
+
+export default async function JobDetailPage({ params }: Props) {
+  const job = await getJob(params.id);
 
   if (!job) {
     notFound();

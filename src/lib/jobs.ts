@@ -1,5 +1,6 @@
 import type { Job } from '@/lib/types';
 
+// This file is now a fallback or for seeding, data is fetched from Firestore.
 export const jobs: Job[] = [
   {
     id: '1',
@@ -34,37 +35,4 @@ export const jobs: Job[] = [
     requirements: ['5+ ans d\'expérience comme chauffeur privé', 'Casier judiciaire vierge', 'Excellente connaissance d\'Abidjan', 'Présentation impeccable'],
     image: 'driver-1',
   },
-  {
-    id: '4',
-    title: 'Majordome / Butler pour Propriété',
-    category: 'butler',
-    location: 'Assinie',
-    salary: 350000,
-    salaryType: 'month',
-    description: 'Gestion complète d\'une villa de luxe. Coordination du personnel, service à table, gestion des stocks, accueil des invités. Poste logé.',
-    requirements: ['Expérience en hôtellerie de luxe ou comme majordome', 'Excellentes compétences en communication', 'Anglais et Français courants', 'Discrétion absolue'],
-    image: 'butler-1',
-  },
-    {
-    id: '5',
-    title: 'Aide Ménagère à la journée',
-    category: 'housekeeper',
-    location: 'Yamoussoukro',
-    salary: 5000,
-    salaryType: 'day',
-    description: 'Recherche une aide ménagère pour une journée complète de nettoyage. Grand ménage de printemps pour une villa.',
-    requirements: ['Expérience souhaitée', 'Fiable et ponctuelle', 'Respect des consignes'],
-    image: 'housekeeper-2',
-  },
-  {
-    id: '6',
-    title: 'Garde d\'enfants après l\'école',
-    category: 'nanny',
-    location: 'Bouaké',
-    salary: 45000,
-    salaryType: 'month',
-    description: 'Recherche une personne de confiance pour récupérer un enfant de 8 ans à l\'école, l\'aider avec ses devoirs et l\'accompagner à ses activités.',
-    requirements: ['Expérience avec les enfants', 'Patient(e) et pédagogue', 'Disponible de 16h30 à 19h en semaine'],
-    image: 'nanny-2',
-  }
 ];

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -24,6 +25,9 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
+import { addJob } from '@/app/actions';
+import { Loader2 } from 'lucide-react';
 
 const jobFormSchema = z.object({
   title: z.string().min(5, 'Le titre doit comporter au moins 5 caractères.'),
@@ -39,6 +43,9 @@ type JobFormValues = z.infer<typeof jobFormSchema>;
 
 export default function NewJobPage() {
   const router = useRouter();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const form = useForm<JobFormValues>({
     resolver: zodResolver(jobFormSchema),
     defaultValues: {
@@ -46,15 +53,31 @@ export default function NewJobPage() {
         location: '',
         description: '',
         requirements: '',
+        category: 'housekeeper',
+        salary: 0,
+        salaryType: 'month'
     }
   });
 
-  function onSubmit(data: JobFormValues) {
-    // In a real app, you would handle form submission here,
-    // like sending the data to your server/database.
-    console.log(data);
-    alert('Offre créée ! (simulation)');
-    router.push('/admin/jobs');
+  async function onSubmit(data: JobFormValues) {
+    setIsSubmitting(true);
+    const result = await addJob(data);
+    setIsSubmitting(false);
+
+    if (result.success) {
+      toast({
+        title: 'Succès',
+        description: "L'offre d'emploi a été créée.",
+      });
+      router.push('/admin/jobs');
+      router.refresh(); // To refetch jobs on the main page
+    } else {
+      toast({
+        title: 'Erreur',
+        description: result.error,
+        variant: 'destructive',
+      });
+    }
   }
 
   return (
@@ -136,7 +159,7 @@ export default function NewJobPage() {
                     <FormItem>
                         <FormLabel>Salaire (en FCFA)</FormLabel>
                         <FormControl>
-                        <Input type="number" placeholder="Ex: 80000" {...field} />
+                        <Input type="number" placeholder="Ex: 80000" {...field} onChange={event => field.onChange(+event.target.value)} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -206,8 +229,13 @@ export default function NewJobPage() {
               />
 
               <div className="flex gap-4">
-                 <Button type="submit">Créer l'offre</Button>
-                 <Button type="button" variant="outline" onClick={() => router.back()}>Annuler</Button>
+                 <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Créer l'offre
+                 </Button>
+                 <Button type="button" variant="outline" onClick={() => router.back()} disabled={isSubmitting}>
+                    Annuler
+                 </Button>
               </div>
             </form>
           </Form>

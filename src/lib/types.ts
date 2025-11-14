@@ -1,3 +1,5 @@
+import type { Timestamp } from "firebase/firestore";
+
 export type JobCategory = 'housekeeper' | 'nanny' | 'driver' | 'butler';
 
 export type Job = {
@@ -10,4 +12,5 @@ export type Job = {
   description: string;
   requirements: string[];
   image: string; // id from placeholder-images.json
+  createdAt?: Timestamp;
 };
