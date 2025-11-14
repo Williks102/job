@@ -1,3 +1,46 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "housekeeper-1",
+      "description": "A clean and modern living room.",
+      "imageUrl": "https://images.unsplash.com/photo-1597406462800-280ba190eb4c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxjbGVhbiUyMGxpdmluZ3Jvb218ZW58MHx8fHwxNzYzMTI5MzY5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "clean livingroom"
+    },
+    {
+      "id": "nanny-1",
+      "description": "A child playing with toys in a colorful room.",
+      "imageUrl": "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxjaGlsZCUyMHBsYXlpbmd8ZW58MHx8fHwxNzYzMTI1MjQxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "child playing"
+    },
+    {
+      "id": "driver-1",
+      "description": "Interior of a luxury car.",
+      "imageUrl": "https://images.unsplash.com/photo-1618418721668-0d1f72aa4bab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxsdXh1cnklMjBjYXJ8ZW58MHx8fHwxNzYzMDQ1MzY1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "luxury car"
+    },
+    {
+      "id": "butler-1",
+      "description": "A formal dining table set for a meal.",
+      "imageUrl": "https://images.unsplash.com/photo-1583845112239-97ef1341b271?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxkaW5pbmclMjB0YWJsZXxlbnwwfHx8fDE3NjMxMTE1MTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "dining table"
+    },
+    {
+      "id": "housekeeper-2",
+      "description": "A neatly organized laundry room.",
+      "imageUrl": "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxsYXVuZHJ5JTIwcm9vbXxlbnwwfHx8fDE3NjMxMjkzNjl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "laundry room"
+    },
+    {
+      "id": "nanny-2",
+      "description": "A child doing homework at a desk.",
+      "imageUrl": "https://images.unsplash.com/photo-1758612898701-e2f2958f219d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxjaGlsZCUyMGhvbWV3b3JrfGVufDB8fHx8MTc2MzEyOTM2OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "child homework"
+    },
+    {
+      "id": "recommender-hero",
+      "description": "An AI bot icon on a blue background",
+      "imageUrl": "https://images.unsplash.com/photo-1679639539537-0d2e452890f7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8QUklMjBhYnN0cmFjdHxlbnwwfHx8fDE3NjMwMjQwODB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "AI abstract"
+    }
+  ]
 }
