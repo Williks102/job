@@ -7,9 +7,8 @@ const serviceAccount = {
 };
 
 export async function initAdmin() {
-  const apps = admin.apps;
-  if (apps.length > 0) {
-    return apps[0] as admin.app.App;
+  if (admin.apps.length > 0) {
+    return admin.apps[0] as admin.app.App;
   }
 
   return admin.initializeApp({
