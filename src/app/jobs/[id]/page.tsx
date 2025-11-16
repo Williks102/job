@@ -8,8 +8,9 @@ import WhatsAppButton from '@/components/whatsapp-button';
 import { Button } from '@/components/ui/button';
 import { JobIcon } from '@/components/icons';
 import type { Job } from '@/lib/types';
-import { doc, getDoc, collection, getDocs } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import { db } from '@/lib/firebase/firebase';
+import { getJob } from '@/app/actions';
 
 type Props = {
   params: { id: string };
@@ -23,23 +24,6 @@ const formatSalary = (salary: number, type: Job['salaryType']) => {
         case 'month': return `${formattedSalary} FCFA / mois`;
         case 'year': return `${formattedSalary} FCFA / an`;
         default: return `${formattedSalary} FCFA`;
-    }
-}
-
-async function getJob(id: string): Promise<Job | null> {
-    try {
-        const docRef = doc(db, "jobListings", id);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-            return { id: docSnap.id, ...docSnap.data() } as Job;
-        } else {
-            console.log("No such document!");
-            return null;
-        }
-    } catch (error) {
-        console.error("Error getting document:", error);
-        return null;
     }
 }
 
@@ -57,9 +41,9 @@ export async function generateStaticParams() {
 }
 
 export default async function JobDetailPage({ params }: Props) {
-  const job = await getJob(params.id);
+  const { job, error } = await getJob(params.id);
 
-  if (!job) {
+  if (error || !job) {
     notFound();
   }
 

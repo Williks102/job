@@ -28,6 +28,7 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { addJob } from '@/app/actions';
 import { Loader2 } from 'lucide-react';
+import { getCurrentUser } from '@/lib/firebase/auth';
 
 const jobFormSchema = z.object({
   title: z.string().min(5, 'Le titre doit comporter au moins 5 caractères.'),
@@ -61,7 +62,17 @@ export default function NewJobPage() {
 
   async function onSubmit(data: JobFormValues) {
     setIsSubmitting(true);
-    const result = await addJob(data);
+    const user = getCurrentUser();
+    if (!user) {
+        toast({
+            title: 'Erreur',
+            description: 'Vous devez être connecté pour créer une offre.',
+            variant: 'destructive',
+        });
+        setIsSubmitting(false);
+        return;
+    }
+    const result = await addJob(data, { uid: user.uid });
     setIsSubmitting(false);
 
     if (result.success) {
@@ -70,7 +81,7 @@ export default function NewJobPage() {
         description: "L'offre d'emploi a été créée.",
       });
       router.push('/admin/jobs');
-      router.refresh(); // To refetch jobs on the main page
+      router.refresh(); 
     } else {
       toast({
         title: 'Erreur',

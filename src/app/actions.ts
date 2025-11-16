@@ -2,11 +2,11 @@
 
 import { recommendCandidates, type JobOfferDetails } from "@/ai/flows/recommend-relevant-jobs";
 import { z } from "zod";
-import { collection, addDoc, getDocs, Timestamp }from "firebase/firestore";
+import { collection, addDoc, getDocs, Timestamp, doc, getDoc }from "firebase/firestore";
 import { db } from "@/lib/firebase/firebase";
 import type { Job } from "@/lib/types";
 import { isFirebaseError, FirestorePermissionError, errorEmitter } from "@/lib/firebase/error-handler";
-import { signInWithEmail, signOut, getCurrentUser } from "@/lib/firebase/auth";
+import { signInWithEmail, signOut, isAdminEmail } from "@/lib/firebase/auth";
 
 const JobOfferDetailsSchema = z.object({
     jobTitle: z.string().describe('The title of the job offer.'),
@@ -46,13 +46,12 @@ export async function getRecommendedCandidates(details: JobOfferDetails) {
   }
 }
 
-export async function addJob(formData: unknown) {
-    try {
-        const user = await getCurrentUser();
-        if (!user) {
-            return { success: false, error: "Utilisateur non authentifié." };
-        }
+export async function addJob(formData: unknown, user: { uid: string }) {
+    if (!user || !isAdminEmail(user.uid)) {
+        return { success: false, error: "Action non autorisée." };
+    }
 
+    try {
         const validatedData = jobFormSchema.parse(formData);
         const requirementsArray = validatedData.requirements.split('\n').map(req => req.trim()).filter(req => req.length > 0);
 
@@ -116,17 +115,25 @@ export async function handleLogin(formData: unknown) {
   try {
     const validatedData = loginFormSchema.parse(formData);
     const { email, password } = validatedData;
+    
+    if (!isAdminEmail(email)) {
+        return { success: false, error: 'Accès non autorisé. Cet espace est réservé aux administrateurs.' };
+    }
+
     await signInWithEmail(email, password);
     return { success: true };
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { success: false, error: "Données de connexion invalides." };
     }
-    // Firebase Auth errors have a 'code' property
     if (isFirebaseError(error)) {
         switch (error.code) {
             case 'auth/invalid-credential':
+            case 'auth/user-not-found':
+            case 'auth/wrong-password':
                 return { success: false, error: 'Email ou mot de passe incorrect.' };
+            case 'auth/too-many-requests':
+                return { success: false, error: 'Trop de tentatives de connexion. Veuillez réessayer plus tard.' };
             default:
                  return { success: false, error: 'Une erreur est survenue lors de la connexion.' };
         }
@@ -137,4 +144,20 @@ export async function handleLogin(formData: unknown) {
 
 export async function handleLogout() {
     await signOut();
+}
+
+export async function getJob(id: string): Promise<{ job: Job | null, error: string | null}> {
+    try {
+        const docRef = doc(db, "jobListings", id);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            return { job: { id: docSnap.id, ...docSnap.data() } as Job, error: null };
+        } else {
+            return { job: null, error: "Offre non trouvée" };
+        }
+    } catch (error) {
+        console.error("Error getting document:", error);
+        return { job: null, error: "Erreur lors de la récupération de l'offre." };
+    }
 }

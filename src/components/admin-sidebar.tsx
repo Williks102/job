@@ -13,6 +13,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Home, LayoutGrid, Briefcase, Settings, LogOut } from 'lucide-react';
 import { handleLogout } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
+import { getCurrentUser, isAdminEmail } from '@/lib/firebase/auth';
+import { useEffect, useState } from 'react';
 
 const links = [
   { href: '/admin', label: 'Tableau de bord', icon: LayoutGrid },
@@ -23,6 +25,12 @@ export default function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { toast } = useToast();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const user = getCurrentUser();
+    setIsAdmin(isAdminEmail(user?.email));
+  }, []);
 
   const onLogout = async () => {
     await handleLogout();
@@ -33,6 +41,10 @@ export default function AdminSidebar() {
     router.push('/login');
     router.refresh();
   };
+
+  if (!isAdmin) {
+    return null;
+  }
 
   return (
     <>
