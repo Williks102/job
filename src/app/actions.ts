@@ -91,7 +91,7 @@ export async function getJobs() {
             const data = doc.data();
             jobs.push({ id: doc.id, ...data } as Job);
         });
-        return { success: true, data: jobs };
+        return { success: true, data: jobs, error: null };
     } catch (error) {
         if (isFirebaseError(error) && error.code === 'permission-denied') {
             const permissionError = new FirestorePermissionError(
@@ -100,10 +100,10 @@ export async function getJobs() {
                 {...error}
             );
             errorEmitter.emit('permission-error', permissionError);
-            return { success: false, error: permissionError.publicMessage };
+            return { success: false, data: [], error: permissionError.publicMessage };
         }
         console.error("Error fetching jobs:", error);
-        return { success: false, error: "Impossible de charger les offres d'emploi." };
+        return { success: false, data: [], error: "Impossible de charger les offres d'emploi." };
     }
 }
 
