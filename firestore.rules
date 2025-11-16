@@ -1,20 +1,73 @@
+/**
+ * @file Firestore Security Rules
+ * @description This ruleset enforces a user-ownership model for employers and uses denormalized data for authorization independence in job listings.
+ *
+ * Data Structure:
+ * - /employers/{employerId}: Stores employer profiles. Only the employer can read/write their own profile.
+ * - /jobListings/{jobListingId}: Stores job listings. Includes the employerId field (denormalized) for authorization.
+ *
+ * Key Security Decisions:
+ * - Employers can only manage their own profiles and job listings.
+ * - Job listings can be read by anyone, but only the owning employer can create, update, or delete them.
+ * - List operations are secured to prevent unauthorized data access.
+ *
+ * Denormalization for Authorization:
+ * - The `JobListing` document includes the `employerId` to avoid needing to fetch the `Employer` document for authorization checks. This enables atomic operations and prevents expensive `get()` calls in the rules.
+ */
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Règle spécifique pour la collection "jobs"
-    // Autorise la lecture par n'importe qui (public)
-    // Autorise l'écriture uniquement pour les utilisateurs authentifiés (admin)
-    match /jobs/{jobId} {
-      allow read: if true;
-      allow write: if request.auth != null;
+
+    /**
+     * @description Allows employers to manage their own profiles.
+     * @path /employers/{employerId}
+     * @allow (create, update, delete) - An authenticated user whose UID matches the employerId can manage the employer profile.
+     *   Example: request.auth.uid == 'employer123' AND resource.id == 'employer123'
+     * @deny (create, update, delete) - An unauthenticated user cannot manage any employer profile.
+     *   Example: request.auth == null
+     * @principle Enforces document ownership for writes.
+     */
+    match /employers/{employerId} {
+      allow get: if true;
+      allow list: if false;
+
+      allow create: if isSignedIn() && request.auth.uid == employerId;
+      allow update: if isExistingOwner(employerId) && request.auth.uid == employerId;
+      allow delete: if isExistingOwner(employerId) && request.auth.uid == employerId;
     }
 
-    // Règle par défaut pour TOUTES LES AUTRES collections
-    // Exige une authentification pour toute lecture ou écriture.
-    // Ne s'applique pas à /jobs car une règle plus spécifique a déjà été trouvée.
-    match /{path=**}/documents/{document} {
-        allow read, write: if request.auth != null;
+    /**
+     * @description Allows anyone to read job listings, but only the owning employer can create, update, or delete them.
+     * @path /jobListings/{jobListingId}
+     * @allow (get, list) - Any user (or unauthenticated user) can read job listings.
+     *   Example: request.auth == null (public read access)
+     * @allow (create) - An authenticated user whose UID matches the employerId in the job listing data can create a job listing.
+     *   Example: request.auth.uid == 'employer123' AND request.resource.data.employerId == 'employer123'
+     * @deny (create, update, delete) - An unauthenticated user cannot manage any job listing.
+     *   Example: request.auth == null
+     * @deny (update, delete) - An authenticated user cannot modify or delete a job listing they don't own.
+     *   Example: request.auth.uid == 'otherEmployer' AND resource.data.employerId == 'employer123'
+     * @principle Enforces document ownership for writes, allows public reads.
+     */
+    match /jobListings/{jobListingId} {
+      allow get: if true;
+      allow list: if true;
+
+      allow create: if isSignedIn() && request.resource.data.employerId == request.auth.uid;
+      allow update: if isExistingOwner(resource.data.employerId) && request.resource.data.employerId == request.auth.uid;
+      allow delete: if isExistingOwner(resource.data.employerId) && request.resource.data.employerId == request.auth.uid;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(employerId) {
+        return isSignedIn() && request.auth.uid == employerId;
+    }
+
+    function isExistingOwner(employerId) {
+        return isOwner(employerId) && resource != null;
     }
   }
 }

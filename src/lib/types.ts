@@ -13,4 +13,5 @@ export type Job = {
   requirements: string[];
   image: string; // id from placeholder-images.json
   createdAt?: Timestamp;
+  employerId?: string;
 };

@@ -6,7 +6,7 @@ import { collection, addDoc, getDocs, Timestamp }from "firebase/firestore";
 import { db } from "@/lib/firebase/firebase";
 import type { Job } from "@/lib/types";
 import { isFirebaseError, FirestorePermissionError, errorEmitter } from "@/lib/firebase/error-handler";
-import { signInWithEmail, signOut } from "@/lib/firebase/auth";
+import { signInWithEmail, signOut, getCurrentUser } from "@/lib/firebase/auth";
 
 const JobOfferDetailsSchema = z.object({
     jobTitle: z.string().describe('The title of the job offer.'),
@@ -48,6 +48,11 @@ export async function getRecommendedCandidates(details: JobOfferDetails) {
 
 export async function addJob(formData: unknown) {
     try {
+        const user = await getCurrentUser();
+        if (!user) {
+            return { success: false, error: "Utilisateur non authentifié." };
+        }
+
         const validatedData = jobFormSchema.parse(formData);
         const requirementsArray = validatedData.requirements.split('\n').map(req => req.trim()).filter(req => req.length > 0);
 
@@ -55,11 +60,11 @@ export async function addJob(formData: unknown) {
             ...validatedData,
             requirements: requirementsArray,
             createdAt: Timestamp.now(),
-             // This is a placeholder, you'll need to update image logic
+            employerId: user.uid,
             image: `housekeeper-${Math.floor(Math.random() * 2) + 1}`,
         };
 
-        const jobsCollection = collection(db, "jobs");
+        const jobsCollection = collection(db, "jobListings");
         await addDoc(jobsCollection, newJob);
         
         return { success: true, message: "Offre d'emploi créée avec succès." };
@@ -68,7 +73,7 @@ export async function addJob(formData: unknown) {
         if (isFirebaseError(error) && error.code === 'permission-denied') {
             const permissionError = new FirestorePermissionError(
                 'write',
-                collection(db, "jobs"),
+                collection(db, "jobListings"),
                 {...error}
             );
             errorEmitter.emit('permission-error', permissionError);
@@ -84,7 +89,7 @@ export async function addJob(formData: unknown) {
 
 export async function getJobs() {
     try {
-        const jobsCollection = collection(db, "jobs");
+        const jobsCollection = collection(db, "jobListings");
         const querySnapshot = await getDocs(jobsCollection);
         const jobs: Job[] = [];
         querySnapshot.forEach((doc) => {
@@ -96,7 +101,7 @@ export async function getJobs() {
         if (isFirebaseError(error) && error.code === 'permission-denied') {
             const permissionError = new FirestorePermissionError(
                 'read',
-                collection(db, "jobs"),
+                collection(db, "jobListings"),
                 {...error}
             );
             errorEmitter.emit('permission-error', permissionError);

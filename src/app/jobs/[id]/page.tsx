@@ -28,7 +28,7 @@ const formatSalary = (salary: number, type: Job['salaryType']) => {
 
 async function getJob(id: string): Promise<Job | null> {
     try {
-        const docRef = doc(db, "jobs", id);
+        const docRef = doc(db, "jobListings", id);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
@@ -45,7 +45,7 @@ async function getJob(id: string): Promise<Job | null> {
 
 export async function generateStaticParams() {
   try {
-    const querySnapshot = await getDocs(collection(db, "jobs"));
+    const querySnapshot = await getDocs(collection(db, "jobListings"));
     const paths = querySnapshot.docs.map((doc) => ({
       id: doc.id,
     }));
